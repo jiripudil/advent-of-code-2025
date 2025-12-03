@@ -1,38 +1,6 @@
 advent_of_code::solution!(3);
 
-pub fn part_one(input: &str) -> Option<u64> {
-    let lines = input.split("\n");
-    let mut sum = 0u64;
-
-    lines.for_each(|line| {
-        let mut largest_value_10 = 0u64;
-        let mut largest_index = 0usize;
-        let digits = line.chars().map(|c| c.to_digit(10).unwrap() as u64);
-        for (index, digit) in digits.clone().enumerate() {
-            if index == line.chars().count() - 1 {
-                break
-            }
-
-            if digit > largest_value_10 {
-                largest_value_10 = digit;
-                largest_index = index;
-            }
-        }
-
-        let mut largest_value_1 = 0;
-        for digit in digits.skip(largest_index + 1) {
-            if digit > largest_value_1 {
-                largest_value_1 = digit;
-            }
-        }
-
-        sum += largest_value_10 * 10 + largest_value_1;
-    });
-
-    Some(sum)
-}
-
-pub fn part_two(input: &str) -> Option<u64> {
+fn solve(input: &str, total_number_of_digits: usize) -> u64 {
     let lines = input.split("\n");
     let mut sum: u64 = 0;
 
@@ -40,7 +8,6 @@ pub fn part_two(input: &str) -> Option<u64> {
         let digits = line.chars().map(|c| c.to_digit(10).unwrap() as u64);
         let len = digits.clone().count();
 
-        let total_number_of_digits: usize = 12;
         let mut values = vec![0u64; total_number_of_digits];
 
         let mut remaining_number_of_digits = total_number_of_digits;
@@ -69,7 +36,15 @@ pub fn part_two(input: &str) -> Option<u64> {
         sum += joltage;
     });
 
-    Some(sum)
+    sum
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    Some(solve(input, 2))
+}
+
+pub fn part_two(input: &str) -> Option<u64> {
+    Some(solve(input, 12))
 }
 
 #[cfg(test)]
