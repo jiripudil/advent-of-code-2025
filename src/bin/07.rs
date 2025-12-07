@@ -1,10 +1,10 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 advent_of_code::solution!(7);
 
 type Point = (usize, usize);
 
-pub fn part_one(input: &str) -> Option<u64> {
+fn parse_grid(input: &str) -> (usize, Point, Vec<Point>) {
     let mut start: Point = (0, 0);
     let mut splitters: Vec<Point> = vec![];
     let rows = input.lines().count();
@@ -17,6 +17,12 @@ pub fn part_one(input: &str) -> Option<u64> {
             }
         }
     }
+
+    (rows, start, splitters)
+}
+
+pub fn part_one(input: &str) -> Option<u64> {
+    let (rows, start, splitters) = parse_grid(input);
 
     let mut beams = vec![start];
     let mut visited = vec![start];
@@ -48,7 +54,37 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let (rows, start, mut splitters) = parse_grid(input);
+    splitters.reverse();
+
+    let mut splitter_timelines: HashMap<Point, u64> = HashMap::with_capacity(splitters.len());
+    for splitter in splitters.iter() {
+        let mut timelines = 0u64;
+
+        for split in [(splitter.0 - 1, splitter.1), (splitter.0 + 1, splitter.1)] {
+            let mut down = (split.0, split.1 + 1);
+            loop {
+                if down.1 >= rows {
+                    timelines += 1;
+                    break;
+                }
+
+                if splitter_timelines.contains_key(&down) {
+                    timelines += splitter_timelines[&down];
+                    break;
+                }
+
+                down = (down.0, down.1 + 1);
+            }
+        }
+
+        splitter_timelines.insert(*splitter, timelines);
+    }
+
+    let topmost_splitter = splitters.last().unwrap();
+    let timelines = splitter_timelines[topmost_splitter];
+
+    Some(timelines)
 }
 
 #[cfg(test)]
@@ -64,6 +100,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(40));
     }
 }
